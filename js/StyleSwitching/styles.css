@@ -1,0 +1,94 @@
+/* ==============================================================
+   STYLE SWITCHING — HUD активного стиля + тач-иконки
+   ============================================================== */
+
+/* --- Индикатор активного стиля (левый верх игровой зоны) --- */
+.style-indicator {
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  pointer-events: none;
+  transition: transform 0.15s ease-out;
+}
+.style-indicator .style-name {
+  font-family: 'Impact', 'Arial Black', 'Courier New', monospace;
+  font-size: 1.1em;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  padding: 0.3em 0.7em;
+  border: 2px solid currentColor;
+  background: rgba(0, 0, 0, 0.55);
+  text-shadow: 0 0 8px currentColor;
+  transition: color 0.2s, border-color 0.2s, transform 0.15s;
+  text-transform: uppercase;
+}
+.style-indicator .style-key {
+  font-size: 0.65em;
+  color: #aaa;
+  letter-spacing: 0.1em;
+  text-shadow: 1px 1px 0 #000;
+  padding-left: 0.4em;
+}
+
+/* Пульс при переключении */
+.style-indicator.switch-pulse .style-name {
+  transform: scale(1.15);
+}
+
+/* Цвета стилей */
+.style-indicator[data-style="trickster"]   .style-name { color: #7fdcff; }
+.style-indicator[data-style="swordmaster"] .style-name { color: #ff3344; }
+.style-indicator[data-style="gunslinger"]  .style-name { color: #ffd600; }
+.style-indicator[data-style="royalguard"]  .style-name { color: #4aa3ff; }
+
+/* --- Тач-кнопки стилей (правый нижний угол) --- */
+.style-touch-buttons {
+  position: absolute;
+  bottom: 6.5em;
+  right: 1.5em;
+  z-index: 5;
+  display: none;
+  flex-direction: column;
+  gap: 0.5em;
+}
+.style-touch-buttons.visible { display: flex; }
+
+.style-touch-btn {
+  width: 3.5em;
+  height: 3.5em;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #888;
+  color: #ccc;
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s, background 0.15s, border-color 0.15s, color 0.15s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  line-height: 1;
+}
+.style-touch-btn:active { transform: scale(0.9); }
+
+.style-touch-btn[data-style="trickster"].active   { border-color: #7fdcff; color: #7fdcff; background: rgba(127,220,255,0.2); }
+.style-touch-btn[data-style="swordmaster"].active { border-color: #ff3344; color: #ff3344; background: rgba(255,51,68,0.2); }
+.style-touch-btn[data-style="gunslinger"].active  { border-color: #ffd600; color: #ffd600; background: rgba(255,214,0,0.2); }
+.style-touch-btn[data-style="royalguard"].active  { border-color: #4aa3ff; color: #4aa3ff; background: rgba(74,163,255,0.2); }
+
+/* --- Адаптив --- */
+@media (max-width: 600px) and (orientation: portrait) {
+  .style-indicator { top: 0.5em; left: 0.5em; }
+  .style-indicator .style-name { font-size: 0.85em; padding: 0.25em 0.5em; }
+  .style-indicator .style-key { display: none; }
+  .style-touch-buttons { bottom: 5.5em; right: 0.8em; gap: 0.35em; }
+  .style-touch-btn { width: 2.8em; height: 2.8em; font-size: 0.7em; }
+}

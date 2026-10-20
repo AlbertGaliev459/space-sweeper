@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Космический уборщик — DE-1 vs VL</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="stage">
+  <div class="game-frame" id="gameFrame">
+
+    <button class="fullscreen-btn" id="fsBtn" title="Полный экран">⛶</button>
+
+    <!-- ═══ ЛОР ═══ -->
+    <div class="screen lore-screen" id="screen-lore">
+      <div class="lore-content">
+        <div class="lore-header">З А П И С Ь &nbsp; № &nbsp; 0 0 1</div>
+        <div class="lore-title">О Т Ч Ё Т &nbsp; D E - 1</div>
+
+        <div class="lore-text">
+          <p>
+            Орбитальная станция <span class="hl-white">«Тёмный Предел»</span> молчит уже
+            третьи сутки. Спасательный дрон <span class="hl-blue">DE-1</span> отправлен
+            на разведку и зачистку обломков.
+          </p>
+          <p>
+            Но пояс астероидов не пуст. Сквозь мусор и обломки пробивается
+            <span class="hl-red">сигнал VL</span> — код, который не должен
+            существовать. Это <em>не дрон</em>. Это <span class="hl-red">клинок</span>.
+          </p>
+          <p>
+            Протокол DE-1 обновлён: при обнаружении VL — материализовать
+            <span class="hl-red">Р Е Б Е Л Л И О Н</span>. Протокол запрещает
+            использовать пушку при активном мече.
+          </p>
+          <p>
+            Единственный способ победить — <span class="hl-white">парировать</span>
+            снаряды VL и вернуть их обратно. Каждое отражение бьёт вдвойне.
+          </p>
+          <p>
+            <em>Собери мусор. Выживи. Дойди до VL. И покажи ему, что такое сила.</em>
+          </p>
+        </div>
+      </div>
+
+      <div class="lore-timer" id="loreTimer">АВТОЗАПУСК ЧЕРЕЗ 8 С</div>
+      <button class="lore-skip" id="loreSkip">ПРОПУСТИТЬ →</button>
+    </div>
+
+    <!-- ═══ МЕНЮ ═══ -->
+    <div class="screen menu-screen" id="screen-menu">
+      <div class="menu-logo">
+        [ ЛОГОТИП ]
+        <div class="sub">КОСМИЧЕСКИЙ УБОРЩИК</div>
+      </div>
+      <div class="menu-buttons">
+        <button class="btn primary" data-action="play">▶  ИГРАТЬ</button>
+        <button class="btn" data-action="settings-from-menu">⚙  НАСТРОЙКИ</button>
+        <button class="btn" data-action="scores">🏆  РЕКОРДЫ</button>
+        <button class="btn" data-action="about">ℹ  ОБ ИГРЕ</button>
+        <button class="btn danger" data-action="quit">🚪  ВЫХОД</button>
+      </div>
+    </div>
+
+    <!-- ═══ ИГРА ═══ -->
+    <div class="screen hud-screen" id="screen-game">
+      <div class="hud-top">
+        <div class="hud-lives" id="lives">❤❤❤</div>
+        <div class="hud-score">ОЧКИ: <span id="score">0</span></div>
+        <button class="hud-pause" data-action="pause">⏸  ESC</button>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas"></canvas>
+        <div class="damage-flash" id="damageFlash"></div>
+
+        <div class="style-rank-hud rank-D" id="styleRankHud">
+          <div class="style-rank-letter" id="styleRankLetter">D</div>
+          <div class="style-rank-bar">
+            <div class="style-rank-bar-fill" id="styleRankBar"></div>
+          </div>
+          <div class="style-combo" id="styleCombo">×0</div>
+        </div>
+
+        <button class="action-btn fire-btn" id="fireBtn">🔥<br>ОГОНЬ</button>
+        <button class="action-btn parry-btn" id="parryBtn">⚔️<br>ПАРИР</button>
+        <button class="action-btn dash-btn" id="dashBtn">⚡<br>РЫВОК</button>
+        <div class="canvas-hint" id="canvasHint">
+          ← стрелки / WASD · стрельба: пробел →
+        </div>
+      </div>
+      <div class="hud-bottom">
+        <div class="buff" id="buff-x2">⚡ x2: —</div>
+        <div class="buff" id="buff-magnet">🧲 Магнит: —</div>
+        <div class="buff" id="buff-shield">🛡 Щит: —</div>
+        <div class="buff" id="buff-sword">⚔️ Меч: —</div>
+      </div>
+    </div>
+
+    <!-- ═══ GAME OVER ═══ -->
+    <div class="screen gameover-screen" id="screen-gameover">
+      <div class="gameover-title">💀 GAME OVER</div>
+      <div class="gameover-score-panel">
+        <div class="gameover-score-line">ВАШ СЧЁТ: <span class="num" id="finalScore">0</span></div>
+        <div class="gameover-score-line">РЕКОРД: <span class="num" id="highScore">0</span></div>
+        <div class="gameover-score-line">МАКС. РАНГ: <span class="num" id="finalRank">D</span></div>
+      </div>
+      <div class="gameover-badge hidden" id="recordBadge">🏆 НОВЫЙ РЕКОРД!</div>
+      <div class="gameover-buttons">
+        <button class="btn primary" data-action="play">🔁  ПОВТОРИТЬ</button>
+        <button class="btn" data-action="scores">🏆  РЕКОРДЫ</button>
+        <button class="btn" data-action="menu">🏠  В МЕНЮ</button>
+      </div>
+    </div>
+
+    <!-- ═══ РЕКОРДЫ ═══ -->
+    <div class="screen" id="screen-scores"
+         style="align-items:center;justify-content:center;">
+      <div class="modal" style="width:min(100%,420px);">
+        <div class="modal-title">🏆 РЕКОРДЫ</div>
+        <div class="scores-list" id="scoresList"></div>
+        <button class="btn" data-action="menu">← НАЗАД</button>
+        <button class="btn danger" data-action="clear-scores">СБРОСИТЬ</button>
+      </div>
+    </div>
+
+    <!-- ═══ ПАУЗА ═══ -->
+    <div class="overlay" id="overlay-pause">
+      <div class="modal">
+        <div class="modal-title">ПАУЗА</div>
+        <button class="btn primary" data-action="resume">▶  ПРОДОЛЖИТЬ</button>
+        <button class="btn" data-action="settings-from-pause">⚙  НАСТРОЙКИ</button>
+        <button class="btn danger" data-action="pause-to-menu">🏠  В МЕНЮ</button>
+      </div>
+    </div>
+
+    <!-- ═══ НАСТРОЙКИ ═══ -->
+    <div class="overlay" id="overlay-settings">
+      <div class="modal settings-modal">
+        <div class="modal-title">НАСТРОЙКИ</div>
+
+        <div class="settings-row">
+          <span class="label">
+            <span class="icon" id="iconMusic">🔊</span>
+            Музыка
+          </span>
+          <input type="range" class="slider" id="sliderMusic"
+                 min="0" max="100" value="60" step="1"
+                 aria-label="Громкость музыки">
+          <span class="slider-value" id="valMusic">60%</span>
+        </div>
+
+        <div class="settings-row">
+          <span class="label">
+            <span class="icon" id="iconSfx">🔊</span>
+            Звуки
+          </span>
+          <input type="range" class="slider" id="sliderSfx"
+                 min="0" max="100" value="80" step="1"
+                 aria-label="Громкость звуков">
+          <span class="slider-value" id="valSfx">80%</span>
+        </div>
+
+        <div class="settings-row">
+          <span class="label">🌐 Язык</span>
+          <select class="dropdown">
+            <option>Русский</option>
+            <option>English</option>
+          </select>
+        </div>
+
+        <div class="settings-hint">🎮 WASD · ←↑↓→ · Пробел — стрелять / парировать</div>
+
+        <div class="settings-btns">
+          <button class="btn" data-action="close-settings">← НАЗАД</button>
+          <button class="btn danger" data-action="reset-settings">СБРОС</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Подключение стилей (CSS) -->
+<link rel="stylesheet" href="js/StyleSwitching/styles.css">
+
+<!-- Основные модули -->
+<script src="js/globals.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/styleRank.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+
+<!-- Модуль смены стилей -->
+<!-- Эффекты стилей (каждый — отдельный файл) -->
+<script src="js/StyleSwitching/effects/trickster.js"></script>
+<script src="js/StyleSwitching/effects/gunslinger.js"></script>
+<script src="js/StyleSwitching/effects/swordmaster.js"></script>
+<script src="js/StyleSwitching/effects/royalguard.js"></script>
+
+<!-- Роутер + UI -->
+<script src="js/StyleSwitching/styleEffects.js"></script>
+<script src="js/StyleSwitching/styleSwitching.js"></script>
+
+<!-- Главный модуль (последним) -->
+<script src="js/main.js"></script>
+</body>
+</html>

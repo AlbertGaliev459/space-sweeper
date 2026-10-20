@@ -1,0 +1,806 @@
+/* ==============================================================
+   0. БАЗА
+   ============================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-card:      #e8e8e8;
+  --bg-panel:     #d0d0d0;
+  --bg-panel-2:   #f5f5f5;
+  --border-dark:  #333;
+  --border-mid:   #888;
+  --border-soft:  #ccc;
+  --text-dark:    #333;
+  --text-mid:     #555;
+  --text-soft:    #888;
+  --accent-green: #c8e6c9;
+  --accent-green-border: #4a8f4e;
+  --accent-red:   #ffcdd2;
+  --accent-red-border:   #a94442;
+  --accent-yellow:#fff3c4;
+  --accent-yellow-border:#d4a017;
+  --accent-yellow-text:  #7d5a00;
+  --accent-blue:  #7fdcff;
+  --accent-red-dmc: #ff3344;
+  --slider-fill: #4a90e2;
+}
+
+html, body {
+  height: 100%; width: 100%;
+  overflow: hidden;
+  font-family: 'Courier New', 'Consolas', monospace;
+  background: #1a1a1a;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: none;
+}
+
+.stage {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 10px;
+  background: #1a1a1a;
+}
+
+.game-frame {
+  position: relative;
+  width: min(100%, calc((100vh - 20px) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  max-height: calc(100vh - 20px);
+  background: var(--bg-card);
+  border: 2px solid var(--border-dark);
+  overflow: hidden;
+  font-size: clamp(9px, 1.7vmin, 16px);
+}
+
+/* ==============================================================
+   1. ЭКРАНЫ И КНОПКИ
+   ============================================================== */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: 2em;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s;
+  pointer-events: none;
+}
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.btn {
+  padding: 0.7em 1em;
+  border: 2px solid var(--text-mid);
+  background: var(--bg-panel);
+  font-family: inherit;
+  font-size: 1em;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.btn:hover  { background: #bbb; }
+.btn:active { transform: scale(0.96); }
+.btn.primary { background: var(--accent-green); border-color: var(--accent-green-border); }
+.btn.primary:hover { background: #a5d6a7; }
+.btn.danger  { background: var(--accent-red);   border-color: var(--accent-red-border); }
+.btn.danger:hover  { background: #ef9a9a; }
+
+/* ==============================================================
+   2. МЕНЮ
+   ============================================================== */
+.menu-screen {
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 20% 30%, #f0f0f0 1px, transparent 1px) 0 0 / 60px 60px,
+    radial-gradient(circle at 80% 60%, #ddd 1px, transparent 1px) 0 0 / 80px 80px,
+    var(--bg-card);
+}
+.menu-logo {
+  text-align: center;
+  padding: 0.8em 1.5em;
+  border: 2px dashed var(--border-mid);
+  background: var(--bg-panel-2);
+  color: var(--text-mid);
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 1em;
+}
+.menu-logo .sub {
+  font-size: 0.6em; font-weight: normal;
+  color: var(--text-soft); margin-top: 4px;
+}
+.menu-buttons {
+  display: flex; flex-direction: column;
+  gap: 0.6em;
+  width: min(100%, 320px);
+}
+
+/* ==============================================================
+   3. ЛОР
+   ============================================================== */
+.lore-screen {
+  background: #050810;          /* ← плотный фон на всё */
+  background-image: radial-gradient(ellipse at center, #0d1528 0%, #050810 70%, #000 100%);
+  color: #cceaff;
+  align-items: center;
+  justify-content: center;
+  padding: 2em 3em;
+  text-align: center;
+  position: absolute;           /* ← на весь фрейм */
+  inset: 0;                     /* ← растащить на все стороны */
+  overflow: hidden;
+}
+.lore-screen::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 85% 25%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 15% 70%, rgba(255,255,255,0.35), transparent),
+    radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.4), transparent);
+  animation: starfield 60s linear infinite;
+}
+@keyframes starfield {
+  from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  to   { background-position: 200px 0, 300px 0, 100px 0, 250px 0, 150px 0, 400px 0; }
+}
+.lore-content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  width: 100%;
+}
+.lore-header {
+  font-size: 1.1em;
+  letter-spacing: 0.4em;
+  color: #7fdcff;
+  text-shadow: 0 0 12px #7fdcff;
+  margin-bottom: 0.5em;
+  opacity: 0;
+  animation: loreFadeIn 0.8s ease-out 0.2s forwards;
+}
+.lore-title {
+  font-size: 2.4em;
+  font-weight: bold;
+  letter-spacing: 0.3em;
+  color: #ff3344;
+  text-shadow: 0 0 20px #ff3344, 0 0 40px #ff3344;
+  margin-bottom: 1.2em;
+  opacity: 0;
+  animation: loreFadeIn 0.8s ease-out 0.6s forwards, lorePulse 3s ease-in-out infinite 1.4s;
+}
+@keyframes lorePulse {
+  0%, 100% { text-shadow: 0 0 20px #ff3344, 0 0 40px #ff3344; }
+  50%      { text-shadow: 0 0 30px #ff3344, 0 0 60px #ff3344, 0 0 80px #7fdcff; }
+}
+.lore-text {
+  font-size: 1em;
+  line-height: 1.9;
+  color: #cceaff;
+  text-align: left;
+  padding: 0 0.5em;
+}
+.lore-text p {
+  margin-bottom: 1.1em;
+  opacity: 0;
+  transform: translateY(8px);
+}
+.lore-text p:nth-child(1) { animation: loreLineIn 0.7s ease-out 1.2s forwards; }
+.lore-text p:nth-child(2) { animation: loreLineIn 0.7s ease-out 2.0s forwards; }
+.lore-text p:nth-child(3) { animation: loreLineIn 0.7s ease-out 2.8s forwards; }
+.lore-text p:nth-child(4) { animation: loreLineIn 0.7s ease-out 3.6s forwards; }
+.lore-text p:nth-child(5) { animation: loreLineIn 0.7s ease-out 4.4s forwards; }
+@keyframes loreFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes loreLineIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.lore-text .hl-red { color: #ff3344; text-shadow: 0 0 8px rgba(255,51,68,0.7); font-weight: bold; }
+.lore-text .hl-blue { color: #7fdcff; text-shadow: 0 0 8px rgba(127,220,255,0.7); font-weight: bold; }
+.lore-text .hl-white { color: #fff; font-weight: bold; }
+.lore-text em { color: #88b8d8; font-style: italic; }
+.lore-skip {
+  position: absolute;
+  bottom: 1.5em; right: 1.5em;
+  z-index: 2;
+  padding: 0.6em 1.2em;
+  background: rgba(127, 220, 255, 0.1);
+  border: 2px solid #7fdcff;
+  color: #7fdcff;
+  font-family: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  transition: background 0.15s, box-shadow 0.15s;
+  opacity: 0;
+  animation: loreFadeIn 0.6s ease-out 5.0s forwards;
+}
+.lore-skip:hover {
+  background: rgba(127, 220, 255, 0.25);
+  box-shadow: 0 0 15px rgba(127, 220, 255, 0.5);
+}
+.lore-timer {
+  position: absolute;
+  bottom: 1.5em; left: 1.5em;
+  z-index: 2;
+  color: #7fdcff;
+  font-size: 0.8em;
+  letter-spacing: 0.2em;
+  opacity: 0;
+  animation: loreFadeIn 0.6s ease-out 5.0s forwards;
+}
+
+/* ==============================================================
+   4. HUD
+   ============================================================== */
+.hud-screen {
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.hud-top {
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border-mid);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+  gap: 0.5em;
+  z-index: 2;
+}
+.hud-lives {
+  display: flex; gap: 0.3em;
+  font-size: 1.5em; color: #c0392b;
+}
+.hud-score {
+  font-size: 1.1em; font-weight: bold;
+  color: var(--text-dark);
+}
+.hud-pause {
+  padding: 0.4em 0.9em;
+  border: 2px solid var(--text-mid);
+  background: #bbb;
+  font-family: inherit; font-size: 0.9em;
+  cursor: pointer;
+}
+
+.canvas-wrap {
+  position: relative;
+  background: #111;
+  overflow: hidden;
+}
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.canvas-hint {
+  position: absolute;
+  bottom: 0.5em; left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75em;
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.damage-flash {
+  position: absolute;
+  inset: 0;
+  background: #ff3344;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 0.05s;
+}
+.damage-flash.active { opacity: 0.35; }
+
+/* ==============================================================
+   5. РАНГ СТИЛЯ
+   ============================================================== */
+.style-rank-hud {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  z-index: 4;
+  text-align: right;
+  pointer-events: none;
+  transition: transform 0.15s ease-out;
+}
+.style-rank-letter {
+  font-size: 4em;
+  font-weight: bold;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+  transition: color 0.25s, transform 0.15s;
+  font-family: 'Impact', 'Arial Black', 'Courier New', monospace;
+}
+.style-rank-letter.pulse { transform: scale(1.35); }
+.style-rank-bar {
+  width: 110px;
+  height: 6px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.3);
+  margin-top: 0.2em;
+  margin-left: auto;
+  overflow: hidden;
+  position: relative;
+}
+.style-rank-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: currentColor;
+  transition: width 0.12s linear, background 0.3s;
+  box-shadow: 0 0 10px currentColor;
+}
+.style-combo {
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000, 0 0 8px currentColor;
+  margin-top: 0.15em;
+  letter-spacing: 0.05em;
+}
+
+.rank-D  .style-rank-letter { color: #999999; }
+.rank-C  .style-rank-letter { color: #a0c8ff; }
+.rank-B  .style-rank-letter { color: #7fdcff; }
+.rank-A  .style-rank-letter { color: #ffd600; }
+.rank-S  .style-rank-letter { color: #ffae00; }
+.rank-SS .style-rank-letter { color: #ff6a00; }
+.rank-SSS .style-rank-letter {
+  color: #ff3344;
+  animation: sssGlow 0.6s ease-in-out infinite alternate;
+}
+@keyframes sssGlow {
+  from { text-shadow: 0 0 15px #ff3344, 0 0 30px #ff3344; transform: scale(1); }
+  to   { text-shadow: 0 0 25px #ff3344, 0 0 50px #ffae00, 0 0 80px #ff3344; transform: scale(1.08); }
+}
+
+/* ==============================================================
+   6. ЭКШЕН-КНОПКИ
+   ============================================================== */
+.action-btn {
+  position: absolute;
+  border-radius: 50%;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: bold;
+  cursor: pointer;
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 5;
+  user-select: none;
+  text-align: center;
+  line-height: 1.1;
+  transition: transform 0.1s, background 0.1s, opacity 0.2s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.action-btn:active { transform: scale(0.9); }
+.action-btn.visible { display: flex; }
+
+.fire-btn {
+  bottom: 1.5em; right: 1.5em;
+  width: 4.5em; height: 4.5em;
+  border: 3px solid rgba(255, 200, 0, 0.9);
+  background: rgba(255, 200, 0, 0.25);
+}
+
+.parry-btn {
+  bottom: 1.5em; right: 6.5em;
+  width: 4.5em; height: 4.5em;
+  border: 3px solid var(--accent-blue);
+  background: rgba(127, 220, 255, 0.25);
+  display: none;
+  position: absolute;
+  flex-direction: column;
+  gap: 2px;
+}
+.parry-btn.visible { display: flex; }
+.parry-btn.cooldown {
+  opacity: 0.4;
+  filter: grayscale(0.7);
+}
+.parry-btn::after {
+  content: "";
+  position: absolute;
+  bottom: 0.5em;
+  left: 20%; right: 20%;
+  height: 3px;
+  background: #7fdcff;
+  border-radius: 2px;
+  transform-origin: left center;
+  transform: scaleX(var(--cd, 1));
+  transition: transform 0.08s linear;
+  box-shadow: 0 0 6px #7fdcff;
+}
+
+.dash-btn {
+  bottom: 6.5em; right: 1.5em;
+  width: 4.5em; height: 4.5em;
+  border: 3px solid var(--accent-blue);
+  background: rgba(127, 220, 255, 0.25);
+  display: none;
+  position: absolute;
+  flex-direction: column;
+  gap: 2px;
+}
+.dash-btn.visible { display: flex; }
+.dash-btn.cooldown {
+  opacity: 0.4;
+  filter: grayscale(0.7);
+}
+.dash-btn::after {
+  content: "";
+  position: absolute;
+  bottom: 0.5em;
+  left: 20%; right: 20%;
+  height: 3px;
+  background: #7fdcff;
+  border-radius: 2px;
+  transform-origin: left center;
+  transform: scaleX(var(--cd, 1));
+  transition: transform 0.08s linear;
+  box-shadow: 0 0 6px #7fdcff;
+}
+
+/* ==============================================================
+   7. БАФФЫ ВНИЗУ
+   ============================================================== */
+.hud-bottom {
+  background: var(--bg-panel);
+  border-top: 2px solid var(--border-mid);
+  display: flex; align-items: center;
+  justify-content: space-around;
+  padding: 0.5em;
+  gap: 0.5em;
+  font-size: 0.9em;
+  color: var(--text-mid);
+  flex-wrap: wrap;
+}
+.buff {
+  padding: 0.4em 0.8em;
+  border: 1px dashed var(--border-mid);
+  background: #eee;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.buff.active {
+  background: var(--accent-yellow);
+  border-color: var(--accent-yellow-border);
+  color: var(--accent-yellow-text);
+  font-weight: bold;
+}
+.buff.sword-ready {
+  background: linear-gradient(90deg, #cceaff, #7fdcff);
+  border-color: var(--accent-blue);
+  color: #0a1a3a;
+  font-weight: bold;
+}
+.buff.sword-parry {
+  background: linear-gradient(90deg, #fff, #ffeb3b);
+  border-color: #ffeb3b;
+  color: #333;
+  font-weight: bold;
+  animation: parryPulse 0.4s ease-in-out infinite alternate;
+}
+.buff.sword-cooldown {
+  background: linear-gradient(90deg, #555, #888);
+  border-color: #555;
+  color: #ccc;
+  font-weight: bold;
+}
+@keyframes parryPulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+
+/* ==============================================================
+   8. ОВЕРЛЕИ
+   ============================================================== */
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5em;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+}
+.overlay.active { opacity: 1; visibility: visible; }
+
+.modal {
+  background: var(--bg-panel-2);
+  border: 2px solid var(--border-dark);
+  padding: 1.5em;
+  display: flex; flex-direction: column;
+  gap: 0.8em;
+  width: min(100%, 420px);
+  max-height: 90%;
+  overflow-y: auto;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+.overlay.active .modal { transform: scale(1); }
+
+.modal-title {
+  text-align: center;
+  font-size: 1.5em; font-weight: bold;
+  padding-bottom: 0.6em;
+  border-bottom: 2px solid var(--border-soft);
+  color: var(--text-dark);
+}
+
+/* ==============================================================
+   9. НАСТРОЙКИ
+   ============================================================== */
+.settings-modal { width: min(100%, 560px); }
+.settings-row {
+  display: flex; align-items: center;
+  gap: 0.8em;
+  font-size: 1em;
+  color: var(--text-dark);
+}
+.settings-row .label {
+  min-width: 7em; font-weight: bold; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.settings-row .label .icon {
+  font-size: 1.15em;
+  line-height: 1;
+  transition: transform 0.2s, opacity 0.2s;
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+}
+.settings-row .label .icon.muted {
+  opacity: 0.55;
+  transform: scale(0.9);
+}
+
+.slider {
+  flex: 1;
+  min-width: 100px;
+  height: 1.4em;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  --fill: 60%;
+}
+
+.slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 0.6em;
+  border-radius: 4px;
+  border: none;
+  background: linear-gradient(
+    to right,
+    var(--slider-fill) 0%,
+    var(--slider-fill) var(--fill),
+    var(--border-soft) var(--fill),
+    var(--border-soft) 100%
+  );
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.3em;
+  height: 1.3em;
+  background: #666;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: calc((0.6em - 1.3em) / 2);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+.slider::-webkit-slider-thumb:hover {
+  background: #444;
+  transform: scale(1.1);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+.slider::-webkit-slider-thumb:active {
+  background: #222;
+  transform: scale(1.15);
+  box-shadow: 0 0 12px var(--slider-fill);
+}
+
+.slider::-moz-range-track {
+  width: 100%;
+  height: 0.6em;
+  border-radius: 4px;
+  border: none;
+  background: var(--border-soft);
+}
+.slider::-moz-range-progress {
+  background: var(--slider-fill);
+  height: 0.6em;
+  border-radius: 4px;
+}
+.slider::-moz-range-thumb {
+  width: 1.3em;
+  height: 1.3em;
+  background: #666;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+.slider::-moz-range-thumb:hover {
+  background: #444;
+  transform: scale(1.1);
+}
+.slider::-moz-range-thumb:active {
+  background: #222;
+  transform: scale(1.15);
+}
+
+.slider-value {
+  min-width: 3.5em;
+  text-align: right;
+  font-weight: bold;
+  flex-shrink: 0;
+  color: var(--text-dark);
+}
+
+.dropdown {
+  flex: 1;
+  padding: 0.5em;
+  border: 2px solid var(--border-mid);
+  background: #fff;
+  font-family: inherit;
+  font-size: 1em;
+  color: var(--text-dark);
+  min-width: 0;
+}
+.settings-hint {
+  padding: 0.7em;
+  background: #eee;
+  border: 1px dashed #aaa;
+  font-size: 0.9em;
+  color: var(--text-mid);
+}
+.settings-btns {
+  display: flex; gap: 0.8em; margin-top: 0.3em;
+}
+.settings-btns .btn { flex: 1; }
+
+/* ==============================================================
+   10. GAME OVER
+   ============================================================== */
+.gameover-screen {
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+  background: var(--bg-card);
+}
+.gameover-title {
+  font-size: 2.5em; font-weight: bold;
+  color: var(--text-dark);
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+.gameover-score-panel {
+  border: 2px solid var(--border-mid);
+  background: var(--bg-panel-2);
+  padding: 1em 2.5em;
+  display: flex; flex-direction: column;
+  gap: 0.4em;
+  text-align: center;
+}
+.gameover-score-line {
+  font-size: 1em;
+  color: var(--text-dark);
+}
+.gameover-score-line .num {
+  font-weight: bold;
+  font-size: 1.3em;
+  color: #222;
+}
+.gameover-badge {
+  padding: 0.6em 1.3em;
+  background: var(--accent-yellow);
+  border: 2px solid var(--accent-yellow-border);
+  color: var(--accent-yellow-text);
+  font-weight: bold;
+  font-size: 1em;
+  letter-spacing: 0.05em;
+  text-align: center;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.gameover-badge.hidden { display: none; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+.gameover-buttons {
+  display: flex; flex-direction: column;
+  gap: 0.6em;
+  width: min(100%, 320px);
+}
+
+/* ==============================================================
+   11. РЕКОРДЫ
+   ============================================================== */
+.scores-list {
+  color: #333;
+  font-size: 1.1em;
+  line-height: 1.8;
+  padding: 0.5em 0;
+  text-align: left;
+}
+.scores-list .empty {
+  text-align: center;
+  color: var(--text-soft);
+  font-style: italic;
+}
+.scores-list .rank {
+  display: inline-block;
+  width: 2em;
+  color: var(--text-soft);
+}
+
+/* ==============================================================
+   12. FULLSCREEN
+   ============================================================== */
+.fullscreen-btn {
+  position: absolute;
+  top: 0.5em; right: 0.5em;
+  width: 2.2em; height: 2.2em;
+  border: 2px solid var(--text-mid);
+  background: rgba(255,255,255,0.85);
+  color: var(--text-dark);
+  font-size: 0.9em;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.fullscreen-btn:hover { background: #fff; }
+
+/* ==============================================================
+   13. АДАПТИВ
+   ============================================================== */
+@media (max-width: 600px) and (orientation: portrait) {
+  .stage { padding: 4px; }
+  .game-frame { font-size: clamp(7px, 2.8vmin, 13px); }
+  .canvas-hint { font-size: 0.65em; }
+  .lore-screen { padding: 1.2em; }
+  .lore-title { font-size: 1.6em; letter-spacing: 0.2em; }
+  .lore-header { font-size: 0.9em; letter-spacing: 0.25em; }
+  .lore-text { font-size: 0.85em; line-height: 1.7; }
+  .lore-skip { bottom: 0.8em; right: 0.8em; font-size: 0.75em; padding: 0.5em 0.9em; }
+  .lore-timer { bottom: 0.8em; left: 0.8em; font-size: 0.7em; }
+  .style-rank-hud { top: 0.5em; right: 0.5em; }
+  .style-rank-letter { font-size: 2.8em; }
+  .style-rank-bar { width: 80px; }
+}
+@media (hover: none) {
+  .btn:hover { background: var(--bg-panel); }
+  .btn.primary:hover { background: var(--accent-green); }
+  .btn.danger:hover  { background: var(--accent-red); }
+}
