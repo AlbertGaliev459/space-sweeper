@@ -216,7 +216,24 @@ const Joystick = (() => {
     mgEl.classList.toggle('active', st.magnetTime > 0);
     shEl.classList.toggle('active', st.shieldTime > 0);
   }
-
+    const st = Game.publicState;
+    const laserBuff = document.getElementById('buff-laser');
+    const heatFill = document.getElementById('laserHeatFill');
+    const heatText = document.getElementById('laserHeatText');
+    
+    const isGunslinger = typeof StyleSwitching !== 'undefined' && StyleSwitching.getCurrentStyle() === 'gunslinger';
+    const isGun4 = typeof StyleEffects !== 'undefined' && StyleEffects.getActiveGun() === 4;
+    
+    if (laserBuff) {
+      laserBuff.style.display = (isGunslinger && isGun4) ? 'block' : 'none';
+      if (isGunslinger && isGun4 && typeof StyleEffects !== 'undefined') {
+        const heat = StyleEffects.getLaserHeat();
+        const overheated = StyleEffects.isLaserOverheated();
+        heatFill.style.width = heat + '%';
+        heatText.textContent = overheated ? 'ПЕРЕГРЕВ!' : Math.round(heat) + '%';
+        heatFill.style.background = overheated ? '#ff3344' : (heat > 70 ? '#ff9800' : '#7fdcff');
+      }
+    }
   function updateSliderUI(sliderId, valId, iconId) {
     const slider = document.getElementById(sliderId);
     const val    = document.getElementById(valId);

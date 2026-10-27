@@ -270,7 +270,7 @@ function spawnObject() {
       const gunId = StyleEffects.getActiveGun();
       const gun = StyleEffects.getGunConfig();
       
-      // --- ЛАЗЕР (Оружие 4) ---
+           // --- ЛАЗЕР (Оружие 4) ---
       if (gunId === 4) {
         // Если кнопка не зажата — выключаем луч
         if (!keys['Space'] && !keys['MouseLeft']) {
@@ -278,10 +278,25 @@ function spawnObject() {
           return;
         }
 
-        // Создаем/обновляем луч (x1, y1 — прямо из носа корабля)
+        // Если перегрет — не стреляем
+        if (StyleEffects.isLaserOverheated()) {
+          laserBeam = null;
+          return;
+        }
+
+        const ramp = StyleEffects.getLaserRamp();
+        // Урон в секунду: от 1 (0 сек) до 12 (2 сек)
+        const dps = 1 + ramp * 11;
+        const frameDmg = dps * 0.05; // 1/20 секунды (примерный шаг)
+
+        bulletCooldown = 0.05; // Обновляем кулдаун для нагрева (частота тика)
+        StyleEffects.setLaserTimer(0.1); // Передаём в Gunslinger, что мы стреляем (для нагрева)
+
         laserBeam = {
           x1: player.x + player.r,
-          y1: player.y
+          y1: player.y,
+          heat: StyleEffects.getLaserHeat(),
+          ramp: ramp
         };
 
         const y1 = laserBeam.y1;
@@ -289,8 +304,8 @@ function spawnObject() {
         // Урон боссу
         if (boss && !boss.dying && !boss.entering && !boss.invulnerable) {
           if (boss.x > laserBeam.x1 && Math.abs(boss.y - y1) < boss.r + 10) {
-             boss.hp -= 0.2; // Урон за кадр (лазер мощный)
-             boss.flashAlpha = 0.3;
+             boss.hp -= frameDmg;
+             boss.flashAlpha = 0.2;
              if (Math.random() < 0.2) Sound.bossHit();
              if (boss.hp <= 0) triggerBossDeath();
           }
@@ -301,7 +316,7 @@ function spawnObject() {
           const o = objects[j];
           if (o.x > laserBeam.x1 && Math.abs(o.y - y1) < o.r + 10) {
             if (o.type === 'asteroid') {
-              o.hp -= 0.1; // Плавит
+              o.hp -= frameDmg;
               o.hitFlash = 0.1;
               if (o.hp <= 0) {
                 emitParticles(o.x, o.y, '#e53935', 14, 1.2);
@@ -320,9 +335,6 @@ function spawnObject() {
             }
           }
         }
-        
-        // Кулдаун для лазера, чтобы он не наносил урон 1000 раз в секунду (а раз в 0.1 сек)
-        bulletCooldown = 0.1; 
         return;
       }
 
@@ -1435,30 +1447,33 @@ function spawnObject() {
       ctx.restore();
     }
     
-        // === Отрисовка лазерного луча ===
-    if (laserBeam) {
-      const x2 = W + 100; // До правого края
-      const y2 = laserBeam.y1; // Строго по горизонтали
-      
-          // === Отрисовка лазерного луча ===
+            // === Отрисовка лазерного луча ===
     if (laserBeam) {
       const x2 = W + 100;
       const y2 = laserBeam.y1;
+      const heatPct = laserBeam.heat / 100;
+      const ramp = laserBeam.ramp;
       
+      // Цвет от голубого до раскаленно-белого
+      const coreColor = ramp > 0.7 ? '#ffffff' : (heatPct > 0.5 ? '#ffcc00' : '#ffffff');
+      const glowColor = ramp > 0.7 ? '#ff5500' : '#7fdcff';
+
       ctx.save();
-      // Внешнее свечение
-      ctx.strokeStyle = 'rgba(127, 220, 255, 0.3)';
-      ctx.lineWidth = 15;
-      ctx.shadowColor = '#7fdcff';
-      ctx.shadowBlur = 20;
+      // Внешнее свечение (толщина зависит от ramp)
+      ctx.strokeStyle = glowColor;
+      ctx.globalAlpha = 0.3 + ramp * 0.3;
+      ctx.lineWidth = 10 + ramp * 25; // От 10 до 35 пикселей
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 20 + ramp * 30;
       ctx.beginPath();
       ctx.moveTo(laserBeam.x1, laserBeam.y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
       
       // Средний слой
-      ctx.strokeStyle = 'rgba(127, 220, 255, 0.8)';
-      ctx.lineWidth = 6;
+      ctx.strokeStyle = coreColor;
+      ctx.globalAlpha = 0.8;
+      ctx.lineWidth = 4 + ramp * 10; // От 4 до 14 пикселей
       ctx.beginPath();
       ctx.moveTo(laserBeam.x1, laserBeam.y1);
       ctx.lineTo(x2, y2);
@@ -1466,21 +1481,21 @@ function spawnObject() {
 
       // Ядро (белое)
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 2 + ramp * 2;
       ctx.beginPath();
       ctx.moveTo(laserBeam.x1, laserBeam.y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
       
       // Вспышка на конце
-      ctx.fillStyle = '#7fdcff';
+      ctx.fillStyle = glowColor;
       ctx.beginPath();
-      ctx.arc(laserBeam.x1, laserBeam.y1, 8, 0, Math.PI * 2);
+      ctx.arc(laserBeam.x1, laserBeam.y1, 8 + ramp * 10, 0, Math.PI * 2);
       ctx.fill();
       
       ctx.restore();
     }
-  }
     
         for (const b of bullets) {
       ctx.save();

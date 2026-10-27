@@ -80,7 +80,9 @@ const StyleEffects = (() => {
   function getGunConfig()         { const s = STYLES.gunslinger(); return s ? s.getGunConfig() : null; }
   function setLaserTimer(t)       { const s = STYLES.gunslinger(); if (s) s.setLaserTimer(t); }
   function getLaserTimer()        { const s = STYLES.gunslinger(); return s ? s.getLaserTimer() : 0; }
-
+    function getLaserHeat()       { const s = STYLES.gunslinger(); return s ? s.getLaserHeat() : 0; }
+  function isLaserOverheated()  { const s = STYLES.gunslinger(); return s ? s.isLaserOverheated() : false; }
+  function getLaserRamp()       { const s = STYLES.gunslinger(); return s ? s.getLaserRamp() : 0; }
   return {
     get metadata() { return getMetadata(); },
     setCurrentStyle,
@@ -89,6 +91,7 @@ const StyleEffects = (() => {
     // Trickster
     getDashCooldown, getDashCooldownMax, getDashDistance, getDashInvulnTime,
     // Gunslinger
-    switchGun, getActiveGun, getGunConfig, setLaserTimer, getLaserTimer
+    switchGun, getActiveGun, getGunConfig, setLaserTimer, getLaserTimer,
+    getLaserHeat, isLaserOverheated, getLaserRamp
   };
 })();
